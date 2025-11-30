@@ -1,0 +1,414 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { ArrowLeft, Check, Download, Mail, MoreHorizontal, X } from "lucide-react"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+// Sample attendees data
+const attendeesData = [
+  {
+    id: "ATT-001",
+    name: "Oluwaseun Adeyemi",
+    email: "oluwaseun@example.com",
+    phone: "+234 801 234 5678",
+    ticketType: "Early Bird",
+    ticketPrice: "₦225,000",
+    purchaseDate: "2025-02-15",
+    checkedIn: true,
+    paymentMethod: "Paystack",
+    notes: "VIP seating requested",
+  },
+  {
+    id: "ATT-002",
+    name: "Chioma Okonkwo",
+    email: "chioma@example.com",
+    phone: "+234 802 345 6789",
+    ticketType: "VIP",
+    ticketPrice: "₦675,000",
+    purchaseDate: "2025-02-16",
+    checkedIn: false,
+    paymentMethod: "Flutterwave",
+    notes: "",
+  },
+  {
+    id: "ATT-003",
+    name: "Emeka Okafor",
+    email: "emeka@example.com",
+    phone: "+234 803 456 7890",
+    ticketType: "Regular",
+    ticketPrice: "₦375,000",
+    purchaseDate: "2025-02-18",
+    checkedIn: true,
+    paymentMethod: "Bank Transfer",
+    notes: "Dietary restrictions: vegetarian",
+  },
+  {
+    id: "ATT-004",
+    name: "Aisha Mohammed",
+    email: "aisha@example.com",
+    phone: "+234 804 567 8901",
+    ticketType: "Early Bird",
+    ticketPrice: "₦225,000",
+    purchaseDate: "2025-02-20",
+    checkedIn: false,
+    paymentMethod: "Paystack",
+    notes: "",
+  },
+  {
+    id: "ATT-005",
+    name: "Tunde Bakare",
+    email: "tunde@example.com",
+    phone: "+234 805 678 9012",
+    ticketType: "Regular",
+    ticketPrice: "₦375,000",
+    purchaseDate: "2025-02-22",
+    checkedIn: true,
+    paymentMethod: "Flutterwave",
+    notes: "Accessibility needs",
+  },
+  {
+    id: "ATT-006",
+    name: "Ngozi Eze",
+    email: "ngozi@example.com",
+    phone: "+234 806 789 0123",
+    ticketType: "VIP",
+    ticketPrice: "₦675,000",
+    purchaseDate: "2025-02-25",
+    checkedIn: false,
+    paymentMethod: "Paystack",
+    notes: "",
+  },
+  {
+    id: "ATT-007",
+    name: "Yusuf Ibrahim",
+    email: "yusuf@example.com",
+    phone: "+234 807 890 1234",
+    ticketType: "Regular",
+    ticketPrice: "₦375,000",
+    purchaseDate: "2025-02-28",
+    checkedIn: true,
+    paymentMethod: "Cash",
+    notes: "",
+  },
+  {
+    id: "ATT-008",
+    name: "Folake Adeleke",
+    email: "folake@example.com",
+    phone: "+234 808 901 2345",
+    ticketType: "Early Bird",
+    ticketPrice: "₦225,000",
+    purchaseDate: "2025-03-01",
+    checkedIn: false,
+    paymentMethod: "Flutterwave",
+    notes: "Group booking with ATT-009",
+  },
+  {
+    id: "ATT-009",
+    name: "Chinedu Eze",
+    email: "chinedu@example.com",
+    phone: "+234 809 012 3456",
+    ticketType: "Regular",
+    ticketPrice: "₦375,000",
+    purchaseDate: "2025-03-05",
+    checkedIn: false,
+    paymentMethod: "Paystack",
+    notes: "Group booking with ATT-008",
+  },
+  {
+    id: "ATT-010",
+    name: "Amina Bello",
+    email: "amina@example.com",
+    phone: "+234 810 123 4567",
+    ticketType: "VIP",
+    ticketPrice: "₦675,000",
+    purchaseDate: "2025-03-10",
+    checkedIn: true,
+    paymentMethod: "Bank Transfer",
+    notes: "Special dietary needs",
+  },
+  {
+    id: "ATT-011",
+    name: "Oluwatobi Ajayi",
+    email: "tobi@example.com",
+    phone: "+234 811 234 5678",
+    ticketType: "Regular",
+    ticketPrice: "₦375,000",
+    purchaseDate: "2025-03-12",
+    checkedIn: false,
+    paymentMethod: "Paystack",
+    notes: "",
+  },
+  {
+    id: "ATT-012",
+    name: "Fatima Usman",
+    email: "fatima@example.com",
+    phone: "+234 812 345 6789",
+    ticketType: "Early Bird",
+    ticketPrice: "₦225,000",
+    purchaseDate: "2025-03-15",
+    checkedIn: true,
+    paymentMethod: "Flutterwave",
+    notes: "",
+  },
+]
+
+export default function AttendeesPage({ params }: { params: { id: string } }) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterTicketType, setFilterTicketType] = useState("all")
+  const [filterCheckedIn, setFilterCheckedIn] = useState("all")
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
+
+  // Filter attendees based on search query and filters
+  const filteredAttendees = attendeesData.filter((attendee) => {
+    const matchesSearch =
+      attendee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      attendee.id.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesTicketType = filterTicketType === "all" || attendee.ticketType === filterTicketType
+
+    const matchesCheckedIn =
+      filterCheckedIn === "all" ||
+      (filterCheckedIn === "checked-in" && attendee.checkedIn) ||
+      (filterCheckedIn === "not-checked-in" && !attendee.checkedIn)
+
+    return matchesSearch && matchesTicketType && matchesCheckedIn
+  })
+
+  // Toggle selection of all attendees
+  const toggleSelectAll = () => {
+    if (selectedAttendees.length === filteredAttendees.length) {
+      setSelectedAttendees([])
+    } else {
+      setSelectedAttendees(filteredAttendees.map((attendee) => attendee.id))
+    }
+  }
+
+  // Toggle selection of a single attendee
+  const toggleSelectAttendee = (id: string) => {
+    if (selectedAttendees.includes(id)) {
+      setSelectedAttendees(selectedAttendees.filter((attendeeId) => attendeeId !== id))
+    } else {
+      setSelectedAttendees([...selectedAttendees, id])
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-6">
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" asChild>
+          <Link href={`/dashboard/events/${params.id}`}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">All Attendees</h1>
+          <p className="text-muted-foreground">Manage and view all event attendees</p>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Export List
+          </Button>
+          <Button size="sm">
+            <Mail className="mr-2 h-4 w-4" />
+            Email All
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <Card>
+          <CardHeader className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Attendee Summary</CardTitle>
+                <CardDescription>Quick overview of attendance</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Total Registered</p>
+                <p className="text-2xl font-bold">850</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Checked In</p>
+                <p className="text-2xl font-bold">
+                  412 <span className="text-sm text-muted-foreground">(48.5%)</span>
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">VIP Attendees</p>
+                <p className="text-2xl font-bold">50</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Remaining Capacity</p>
+                <p className="text-2xl font-bold">650</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <Input
+              placeholder="Search attendees..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:w-[300px]"
+            />
+            <Select value={filterTicketType} onValueChange={setFilterTicketType}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Ticket Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Tickets</SelectItem>
+                <SelectItem value="Early Bird">Early Bird</SelectItem>
+                <SelectItem value="Regular">Regular</SelectItem>
+                <SelectItem value="VIP">VIP</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterCheckedIn} onValueChange={setFilterCheckedIn}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Check-in Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="checked-in">Checked In</SelectItem>
+                <SelectItem value="not-checked-in">Not Checked In</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedAttendees.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{selectedAttendees.length} selected</span>
+              <Button variant="outline" size="sm">
+                <Mail className="mr-2 h-4 w-4" />
+                Email Selected
+              </Button>
+              <Button variant="outline" size="sm">
+                <Check className="mr-2 h-4 w-4" />
+                Check In
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <Checkbox
+                      checked={filteredAttendees.length > 0 && selectedAttendees.length === filteredAttendees.length}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </TableHead>
+                  <TableHead>Attendee</TableHead>
+                  <TableHead>Ticket</TableHead>
+                  <TableHead>Purchase Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAttendees.map((attendee) => (
+                  <TableRow key={attendee.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedAttendees.includes(attendee.id)}
+                        onCheckedChange={() => toggleSelectAttendee(attendee.id)}
+                        aria-label={`Select ${attendee.name}`}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={`/placeholder.svg?height=40&width=40`} />
+                          <AvatarFallback>
+                            {attendee.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{attendee.name}</p>
+                          <p className="text-xs text-muted-foreground">{attendee.email}</p>
+                          <p className="text-xs text-muted-foreground">{attendee.phone}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{attendee.ticketType}</Badge>
+                      <p className="mt-1 text-xs text-muted-foreground">{attendee.ticketPrice}</p>
+                    </TableCell>
+                    <TableCell>{attendee.purchaseDate}</TableCell>
+                    <TableCell>
+                      {attendee.checkedIn ? (
+                        <Badge className="bg-green-500 hover:bg-green-600">Checked In</Badge>
+                      ) : (
+                        <Badge variant="outline">Not Checked In</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>{attendee.paymentMethod}</TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem>Send Email</DropdownMenuItem>
+                          <DropdownMenuItem>Edit Information</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {attendee.checkedIn ? (
+                            <DropdownMenuItem>
+                              <X className="mr-2 h-4 w-4" />
+                              Undo Check-in
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem>
+                              <Check className="mr-2 h-4 w-4" />
+                              Check In
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

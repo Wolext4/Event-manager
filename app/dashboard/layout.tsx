@@ -199,15 +199,6 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col">
         {/* Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:px-6">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-          </Sheet>
-
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             <Button variant="ghost" size="icon" asChild>

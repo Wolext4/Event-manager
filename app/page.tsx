@@ -1,12 +1,7 @@
+"use client"
+
 import { redirect } from "next/navigation"
-
-export default function Home() {
-  redirect("/dashboard")
-}
-;("use client")
-
 import type React from "react"
-
 import { useState } from "react"
 import {
   Calendar,
@@ -39,6 +34,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
+
+export default function Home() {
+  redirect("/dashboard")
+}
 
 function Dashboard() {
   const [tasks, setTasks] = useState([
@@ -134,7 +133,7 @@ function Dashboard() {
               </div>
             </form>
           </div>
-          <Button variant="outline" size="sm" className="ml-auto hidden md:flex">
+          <Button variant="outline" size="sm" className="ml-auto hidden md:flex bg-transparent">
             <Plus className="mr-2 h-4 w-4" />
             New Event
           </Button>
